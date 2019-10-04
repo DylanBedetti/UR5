@@ -1,5 +1,7 @@
 # UR5 - GENG5508 Robotics Project aka **Wankbot**
 
+---
+
 # How to use
 ## Getting Started 
 1. `git clone https://github.com/DylanBedetti/UR5.git`
