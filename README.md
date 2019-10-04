@@ -9,7 +9,7 @@
 3. Swap to new branch `git checkout <name>`
 
 ## Adding code and commiting changes (after creating branch)
-1. first, `git pull`, then write your code
+1. first, `git pull origin master`, then write your code
 2. `git add *`
 3. `git commit -m "<your message>"`
 4. `git push` or `git push --set-upstream origin <name>`
