@@ -10,7 +10,7 @@
 1. Write your code
 2. `git add *`
 3. `git commit -m "<your message>"`
-4. `git push`
+4. `git push` or `git push --set-upstream origin <name>`
 
 ## Merging into master
 1. `git checkout master`
