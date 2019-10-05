@@ -1,0 +1,13 @@
+ Program
+   Robot Program
+     rq_close_and_wait(1)
+     rq_open_and_wait(1)
+     MoveJ
+       home
+     MoveJ
+       Waypoint_1
+       Waypoint_2
+     Gripper Close (1)
+     MoveJ
+       Waypoint_3
+     Gripper Open (1)

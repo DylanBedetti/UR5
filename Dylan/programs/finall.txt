@@ -1,0 +1,72 @@
+ Program
+   Init Variables
+   BeforeStart
+     MoveJ
+       Waypoint_3
+       Gripper Open (1)
+       object_location=p[0,0,0,0,0,0]
+   Robot Program
+     write_port_register(131,0)
+     MoveJ
+       robopoint_var
+     Camera Locate
+       'If camera_locate≟0'
+       knob≔object_location
+       knob[2]=knob[2] + 0.185
+       x≔object_location
+       x[2]=x[2]+0.4
+       MoveJ
+         Waypoint_6
+         x
+         knob
+       b≔get_joint_positions()
+       b[3]=b[3]+(0.5)
+       b[5]=0
+       MoveJ
+         b
+       write_port_register(131,1)
+       Wait: 1.0
+       Wait read_port_register(130)≠0
+       Wait (read_port_register(130)≟0) and (read_port_register(131)≟0)
+     'If read_port_register(130) ≟ 1'
+     'If read_port_register(130) ≟ 2'
+     'If read_port_register(130) ≟3'
+   Event read_port_register(130)≟1
+     knob≔p[0,0,0,0,0,0]
+     knob≔object_location
+     knob[2]=knob[2] + 0.185
+     MoveJ
+       knob
+     Gripper Close (1)
+     MoveJ
+       Waypoint_1
+       Waypoint_4
+     Gripper Open (1)
+     write_port_register(131,0)
+     write_port_register(130, 0)
+   Event read_port_register(130)≟2
+     knob≔p[0,0,0,0,0,0]
+     knob≔object_location
+     knob[2]=knob[2] + 0.185
+     MoveJ
+       knob
+     Gripper Close (1)
+     MoveJ
+       Waypoint_1
+       Waypoint_5
+     Gripper Open (1)
+     write_port_register(131,0)
+     write_port_register(130, 0)
+   Event read_port_register(130)≟3
+     knob≔p[0,0,0,0,0,0]
+     knob≔object_location
+     knob[2]=knob[2] + 0.185
+     MoveJ
+       knob
+     Gripper Close (1)
+     MoveJ
+       Waypoint_1
+       Waypoint_2
+     Gripper Open (1)
+     write_port_register(131,0)
+     write_port_register(130, 0)

@@ -1,0 +1,78 @@
+ Program
+   BeforeStart
+     MoveJ
+       robopoint_var
+   Robot Program
+     Loop 5 times
+       MoveJ
+         Waypoint_4
+         robopoint_var
+       Camera Locate
+         Gripper Open (1)
+         MoveJ
+           'The robot moves relatively'
+           'to the located object.'
+           crosspos≔object_location
+           crosspos[2]=crosspos[2] +0.2
+           crosspos
+           'Enter your gripper instructions here.'
+           Gripper Close (1)
+           Waypoint_1
+           Waypoint_2
+           Gripper Open (1)
+           MoveJ
+             Waypoint_3
+             Waypoint_5
+       MoveJ
+         Waypoint_4
+         robopoint_var
+       Camera Locate
+         MoveJ
+           'The robot moves relatively'
+           'to the located object.'
+           crosspos≔object_location
+           crosspos[2]=crosspos[2] +0.2
+           crosspos
+           'Enter your gripper instructions here.'
+           Gripper Close (1)
+           Waypoint_1
+           Waypoint_2
+           Gripper Open (1)
+           MoveJ
+             Waypoint_3
+             Waypoint_5
+       MoveJ
+         Waypoint_4
+         robopoint_var
+       Camera Locate
+         MoveJ
+           'The robot moves relatively'
+           'to the located object.'
+           crosspos≔object_location
+           crosspos[2]=crosspos[2] +0.2
+           crosspos
+           'Enter your gripper instructions here.'
+           Gripper Close (1)
+           Waypoint_1
+           Waypoint_2
+           Gripper Open (1)
+           MoveJ
+             Waypoint_3
+             Waypoint_5
+     'Camera Locate'
+     'Camera Locate'
+     MoveJ
+       robopoint_var
+     Camera Locate
+       Gripper Open (1)
+       MoveJ
+         'The robot moves relatively'
+         'to the located object.'
+         crosspos≔object_location
+         crosspos[2]=crosspos[2] +0.15
+         crosspos
+         'Enter your gripper instructions here.'
+         Gripper Close (1)
+         Waypoint_1
+         Waypoint_2
+         Gripper Open (1)

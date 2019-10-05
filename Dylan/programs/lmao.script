@@ -1,25 +1,57 @@
-def gripper_tutorial2():
-  set_tool_voltage(0)
+def lmao():
   modbus_add_signal("192.168.1.6", 255, 130, 3, "bucketselect", False)
   modbus_set_signal_update_frequency("bucketselect", 10)
-  modbus_add_signal("192.168.1.6", 255, 131, 2, "starttoken", False)
+  modbus_add_signal("192.168.1.6", 255, 131, 3, "starttoken", False)
   modbus_set_signal_update_frequency("starttoken", 10)
-  modbus_set_runstate_dependent_choice("bucketselect",0)
   set_standard_analog_input_domain(0, 1)
   set_standard_analog_input_domain(1, 1)
   set_tool_analog_input_domain(0, 1)
   set_tool_analog_input_domain(1, 1)
   set_analog_outputdomain(0, 0)
   set_analog_outputdomain(1, 0)
+  set_tool_voltage(0)
   set_input_actions_to_default()
+  modbus_set_runstate_dependent_choice("bucketselect",0)
+  modbus_set_runstate_dependent_choice("starttoken",0)
   set_tcp(p[0.0,0.0,0.0,0.0,0.0,0.0])
   set_payload(0.0)
   set_gravity([0.0, 0.0, 9.82])
-  set_safety_mode_transition_hardness(0)
   global Base=p[0.0,0.0,0.0,0.0,0.0,0.0]
   global Point_3=p[0.4276564669043538,-0.06510332743374715,0.8253256069765451,-1.761121677040929,1.9416304386846361,-0.5367451047669847]
   global bucket=p[0.1267229962071472,0.19771730044894786,0.8430265245324436,-1.9985869299048278,0.11877097943034823,-0.13691967566250268]
   global robopoint=p[0.31849527102440145,-0.10553969576737585,0.8536676766387312,-1.7448389490680207,1.7129664518790022,-0.6796947542894476]
+  # begin: URCap Installation Node
+  #   Source: Robotiq_Wrist_Camera, 1.2.1.R01, Robotiq Inc.
+  #   Type: Camera
+  
+  ###########################################
+  #######Vision urcap preamble start########
+  
+  logging_service = rpc_factory("xmlrpc","http://127.0.0.1:4747")
+  # Converts a pose relative to the flange in the base frame.
+  def get_T_in_base_from_flange(T_x_in_flange):
+  
+    T_flange_in_base = get_actual_tool_flange_pose()
+  
+    T_x_in_base = pose_trans(T_flange_in_base, T_x_in_flange)
+  
+    return T_x_in_base
+  end
+  
+  # Search pose cartesian (camera pose)
+  Point_3 = p[0.337876, -0.0755721, 0.592713, -1.63347, 1.80899, -0.657436]
+  robopoint = p[0.318494, -0.105544, 0.853649, -1.74488, 1.71299, -0.679634]
+  T_camera_in_flange = p[0.0, 0.05, 0.05, -0.5, 0.0, 0.0]
+  snapshot_position_offset = p[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  ignore_snapshot_position = False
+  
+  # Open connection with vision service
+  xmlrpc_server=rpc_factory("xmlrpc","http://127.0.0.1:4242")
+  
+  #######Vision urcap preamble end##########
+  ###########################################
+  
+  # end: URCap Installation Node
   # begin: URCap Installation Node
   #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
   #   Type: Gripper
@@ -682,209 +714,23 @@ def gripper_tutorial2():
   ###########################################
   
   # end: URCap Installation Node
-  # begin: URCap Installation Node
-  #   Source: Robotiq_Wrist_Camera, 1.2.1.R01, Robotiq Inc.
-  #   Type: Camera
-  
-  ###########################################
-  #######Vision urcap preamble start########
-  
-  logging_service = rpc_factory("xmlrpc","http://127.0.0.1:4747")
-  # Converts a pose relative to the flange in the base frame.
-  def get_T_in_base_from_flange(T_x_in_flange):
-  
-    T_flange_in_base = get_actual_tool_flange_pose()
-  
-    T_x_in_base = pose_trans(T_flange_in_base, T_x_in_flange)
-  
-    return T_x_in_base
-  end
-  
-  # Search pose cartesian (camera pose)
-  Point_3 = p[0.337876, -0.0755721, 0.592713, -1.63347, 1.80899, -0.657436]
-  robopoint = p[0.318494, -0.105544, 0.853649, -1.74488, 1.71299, -0.679634]
-  T_camera_in_flange = p[0.0, 0.05, 0.05, -0.5, 0.0, 0.0]
-  snapshot_position_offset = p[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-  ignore_snapshot_position = False
-  
-  # Open connection with vision service
-  xmlrpc_server=rpc_factory("xmlrpc","http://127.0.0.1:4242")
-  
-  #######Vision urcap preamble end##########
-  ###########################################
-  
-  # end: URCap Installation Node
-  $ 1 "Robot Program"
-#  $ 2 "Popup"
-#  popup("Don't modify this program. It will be erased at next boot.", "Warning", True, False, blocking=True)
-  $ 3 "'Activate the gripper before controling it'"
-  # 'Activate the gripper before controling it'
-#  $ 4 "Popup"
-#  popup("Activate the gripper before controling it", "Message", False, False, blocking=True)
-  $ 5 "rq_activate_and_wait()"
-  rq_activate_and_wait()
-  $ 6 "'Fully close the gripper and wait for completion'"
-  # 'Fully close the gripper and wait for completion'
-#  $ 7 "Popup"
-#  popup("Fully close the gripper and wait for completion", "Message", False, False, blocking=True)
+  $ 1 "BeforeStart"
+  $ 2 "MoveJ"
+  $ 3 "Waypoint_3"
+  movej([-0.04307875782380233, -1.4671550759626637, -0.5181633445713754, -1.240732494984762, 1.5683276653289795, -0.16348582903017217], a=1.3962634015954636, v=1.0471975511965976)
   # begin: URCap Program Node
   #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
   #   Type: Gripper
-  $ 8 "Gripper Close (1)"
+  $ 4 "Gripper Open (1)"
   if (connectivity_checked[0] != 1):
     if not(rq_set_sid(9, "1")):
-#      popup("Gripper 1 must be connected to run this program.", False, False, True)
+      popup("Gripper 1 must be connected to run this program.", False, False, True)
     end
     connectivity_checked[0] = 1
   end
   if (status_checked[0] != 1):
     if not(rq_is_gripper_activated("1")):
-#      popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
-    end
-    status_checked[0] = 1
-  end
-  if (current_speed[0] != 79):
-    rq_set_speed_norm(79, "1")
-    current_speed[0] = 79
-  end
-  if (current_force[0] != 100):
-    rq_set_force_norm(100, "1")
-    current_force[0] = 100
-  end
-  rq_set_pos_norm(100, "1")
-  rq_go_to("1")
-  rq_wait("1")
-  # end: URCap Program Node
-  $ 9 "'Fully open the gripper and wait for completion'"
-  # 'Fully open the gripper and wait for completion'
-#  $ 10 "Popup"
-#  popup("Fully open the gripper and wait for completion", "Message", False, False, blocking=True)
-  # begin: URCap Program Node
-  #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
-  #   Type: Gripper
-  #$ 11 "Gripper Open (1)"
-  if (connectivity_checked[0] != 1):
-    if not(rq_set_sid(9, "1")):
-#      popup("Gripper 1 must be connected to run this program.", False, False, True)
-    end
-    connectivity_checked[0] = 1
-  end
-  if (status_checked[0] != 1):
-    if not(rq_is_gripper_activated("1")):
-#      popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
-    end
-    status_checked[0] = 1
-  end
-  if (current_speed[0] != 79):
-    rq_set_speed_norm(79, "1")
-    current_speed[0] = 79
-  end
-  if (current_force[0] != 100):
-    rq_set_force_norm(100, "1")
-    current_force[0] = 100
-  end
-  rq_set_pos_norm(0, "1")
-  rq_go_to("1")
-  rq_wait("1")
-  # end: URCap Program Node
-  $ 12 "'Partially close the gripper and wait for completion'"
-  # 'Partially close the gripper and wait for completion'
-#  $ 13 "Popup"
-#  popup("Partially close the gripper and wait for completion", "Message", False, False, blocking=True)
-  # begin: URCap Program Node
-  #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
-  #   Type: Gripper
-  $ 14 "Gripper Move31% (1)"
-  if (connectivity_checked[0] != 1):
-    if not(rq_set_sid(9, "1")):
-#      popup("Gripper 1 must be connected to run this program.", False, False, True)
-    end
-    connectivity_checked[0] = 1
-  end
-  if (status_checked[0] != 1):
-    if not(rq_is_gripper_activated("1")):
-#      popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
-    end
-    status_checked[0] = 1
-  end
-  if (current_speed[0] != 79):
-    rq_set_speed_norm(79, "1")
-    current_speed[0] = 79
-  end
-  if (current_force[0] != 100):
-    rq_set_force_norm(100, "1")
-    current_force[0] = 100
-  end
-  rq_set_pos_norm(31, "1")
-  rq_go_to("1")
-  rq_wait("1")
-  # end: URCap Program Node
-  $ 15 "'Close the gripper and test the object detection'"
-  # 'Close the gripper and test the object detection'
-#  $ 16 "Popup"
-#  popup("Close the gripper and test the object detection", "Message", False, False, blocking=True)
-  # begin: URCap Program Node
-  #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
-  #   Type: Gripper
-  $ 17 "Gripper Close (1)"
-  if (connectivity_checked[0] != 1):
-    if not(rq_set_sid(9, "1")):
-#      popup("Gripper 1 must be connected to run this program.", False, False, True)
-    end
-    connectivity_checked[0] = 1
-  end
-  if (status_checked[0] != 1):
-    if not(rq_is_gripper_activated("1")):
-#      popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
-    end
-    status_checked[0] = 1
-  end
-  if (current_speed[0] != 79):
-    rq_set_speed_norm(79, "1")
-    current_speed[0] = 79
-  end
-  if (current_force[0] != 100):
-    rq_set_force_norm(100, "1")
-    current_force[0] = 100
-  end
-  rq_set_pos_norm(100, "1")
-  rq_go_to("1")
-  rq_wait("1")
-  # end: URCap Program Node
-  $ 18 "If rq_is_object_detected()"
-  if (rq_is_object_detected()):
-    $ 19 "'An object has been detected'"
-    # 'An object has been detected'
-#    $ 20 "Popup"
-#    popup("An object has been detected", "Message", False, False, blocking=True)
-  else:
-    $ 21 "Else"
-    $ 22 "'No object detected'"
-    # 'No object detected'
-#    $ 23 "Popup"
-#    popup("No object detected", "Message", False, False, blocking=True)
-  end
-  $ 24 "'Get the gripper current position in %. 100% is reached when the grippers is in encompassing mode.'"
-  # 'Get the gripper current position in %. 100% is reached when the grippers is in encompassing mode.'
-#  $ 25 "popup(rq_get_position(), 'Gripper position (%)', blocking=True)"
-#  popup(rq_get_position(), "Gripper position (%)", blocking=True)
-  $ 26 "'Command the gripper to open and continue the program execution.'"
-  # 'Command the gripper to open and continue the program execution.'
-#  $ 27 "Popup"
-#  popup("Command the gripper to open and continue the program execution.", "Message", False, False, blocking=True)
-  # begin: URCap Program Node
-  #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
-  #   Type: Gripper
-  $ 28 "Gripper Open (1)"
-  if (connectivity_checked[0] != 1):
-    if not(rq_set_sid(9, "1")):
-#      popup("Gripper 1 must be connected to run this program.", False, False, True)
-    end
-    connectivity_checked[0] = 1
-  end
-  if (status_checked[0] != 1):
-    if not(rq_is_gripper_activated("1")):
-#      popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+      popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
     end
     status_checked[0] = 1
   end
@@ -898,127 +744,276 @@ def gripper_tutorial2():
   end
   rq_set_pos_norm(0, "1")
   rq_go_to("1")
+  rq_wait("1")
   # end: URCap Program Node
-  $ 29 "'You can insert robot movement instructions while the gripper is moving'"
-  # 'You can insert robot movement instructions while the gripper is moving'
-  $ 30 "Wait rq_is_motion_complete()"
-  while (not(rq_is_motion_complete())):
-    sync()
+  thread EventThread():
+    while (True):
+      if (read_port_register(130) == 1):
+        movej(knob, a=1.3962634015954636, v=1.0471975511965976)
+        # begin: URCap Program Node
+        #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+        #   Type: Gripper
+        if (connectivity_checked[0] != 1):
+          if not(rq_set_sid(9, "1")):
+            popup("Gripper 1 must be connected to run this program.", False, False, True)
+          end
+          connectivity_checked[0] = 1
+        end
+        if (status_checked[0] != 1):
+          if not(rq_is_gripper_activated("1")):
+            popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+          end
+          status_checked[0] = 1
+        end
+        if (current_speed[0] != 0):
+          rq_set_speed_norm(0, "1")
+          current_speed[0] = 0
+        end
+        if (current_force[0] != 0):
+          rq_set_force_norm(0, "1")
+          current_force[0] = 0
+        end
+        rq_set_pos_norm(100, "1")
+        rq_go_to("1")
+        rq_wait("1")
+        # end: URCap Program Node
+        movej([0.8094898462295532, -1.3559698641509836, -1.1707444832729017, -1.2304854033701211, 1.5683037042617798, 0.11671474575996399], a=1.3962634015954636, v=1.0471975511965976)
+        movej([0.8817494003287284, -1.9164409601445165, -0.9959861857324235, -1.3649483981402675, 1.6307467222213745, 0.00546630471944809], a=1.3962634015954636, v=1.0471975511965976)
+        # begin: URCap Program Node
+        #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+        #   Type: Gripper
+        if (connectivity_checked[0] != 1):
+          if not(rq_set_sid(9, "1")):
+            popup("Gripper 1 must be connected to run this program.", False, False, True)
+          end
+          connectivity_checked[0] = 1
+        end
+        if (status_checked[0] != 1):
+          if not(rq_is_gripper_activated("1")):
+            popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+          end
+          status_checked[0] = 1
+        end
+        if (current_speed[0] != 0):
+          rq_set_speed_norm(0, "1")
+          current_speed[0] = 0
+        end
+        if (current_force[0] != 0):
+          rq_set_force_norm(0, "1")
+          current_force[0] = 0
+        end
+        rq_set_pos_norm(0, "1")
+        rq_go_to("1")
+        rq_wait("1")
+        # end: URCap Program Node
+        write_port_register(131,0)
+        write_port_register(130, 0)
+      elif (read_port_register(130) == 3):
+        movej(knob, a=1.3962634015954636, v=1.0471975511965976)
+        # begin: URCap Program Node
+        #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+        #   Type: Gripper
+        if (connectivity_checked[0] != 1):
+          if not(rq_set_sid(9, "1")):
+            popup("Gripper 1 must be connected to run this program.", False, False, True)
+          end
+          connectivity_checked[0] = 1
+        end
+        if (status_checked[0] != 1):
+          if not(rq_is_gripper_activated("1")):
+            popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+          end
+          status_checked[0] = 1
+        end
+        if (current_speed[0] != 0):
+          rq_set_speed_norm(0, "1")
+          current_speed[0] = 0
+        end
+        if (current_force[0] != 0):
+          rq_set_force_norm(0, "1")
+          current_force[0] = 0
+        end
+        rq_set_pos_norm(100, "1")
+        rq_go_to("1")
+        rq_wait("1")
+        # end: URCap Program Node
+        movej([0.8094898462295532, -1.3559698641509836, -1.1707444832729017, -1.2304854033701211, 1.5683037042617798, 0.11671474575996399], a=1.3962634015954636, v=1.0471975511965976)
+        movej([1.9347375982250088, -1.7717558665992783, -1.1010708452074418, -1.6242401302194729, 1.630698800086975, 0.0055022574961185455], a=1.3962634015954636, v=1.0471975511965976)
+        # begin: URCap Program Node
+        #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+        #   Type: Gripper
+        if (connectivity_checked[0] != 1):
+          if not(rq_set_sid(9, "1")):
+            popup("Gripper 1 must be connected to run this program.", False, False, True)
+          end
+          connectivity_checked[0] = 1
+        end
+        if (status_checked[0] != 1):
+          if not(rq_is_gripper_activated("1")):
+            popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+          end
+          status_checked[0] = 1
+        end
+        if (current_speed[0] != 0):
+          rq_set_speed_norm(0, "1")
+          current_speed[0] = 0
+        end
+        if (current_force[0] != 0):
+          rq_set_force_norm(0, "1")
+          current_force[0] = 0
+        end
+        rq_set_pos_norm(0, "1")
+        rq_go_to("1")
+        rq_wait("1")
+        # end: URCap Program Node
+        write_port_register(131,0)
+        write_port_register(130, 0)
+      elif (read_port_register(130) == 2):
+        movej(knob, a=1.3962634015954636, v=1.0471975511965976)
+        # begin: URCap Program Node
+        #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+        #   Type: Gripper
+        if (connectivity_checked[0] != 1):
+          if not(rq_set_sid(9, "1")):
+            popup("Gripper 1 must be connected to run this program.", False, False, True)
+          end
+          connectivity_checked[0] = 1
+        end
+        if (status_checked[0] != 1):
+          if not(rq_is_gripper_activated("1")):
+            popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+          end
+          status_checked[0] = 1
+        end
+        if (current_speed[0] != 0):
+          rq_set_speed_norm(0, "1")
+          current_speed[0] = 0
+        end
+        if (current_force[0] != 0):
+          rq_set_force_norm(0, "1")
+          current_force[0] = 0
+        end
+        rq_set_pos_norm(100, "1")
+        rq_go_to("1")
+        rq_wait("1")
+        # end: URCap Program Node
+        movej([0.8094898462295532, -1.3559698641509836, -1.1707444832729017, -1.2304854033701211, 1.5683037042617798, 0.11671474575996399], a=1.3962634015954636, v=1.0471975511965976)
+        movej([1.371027946472168, -1.8226732636438765, -1.0030428643468845, -1.9010828126444332, 1.6307227611541748, 0.005478288978338242], a=1.3962634015954636, v=1.0471975511965976)
+        # begin: URCap Program Node
+        #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+        #   Type: Gripper
+        if (connectivity_checked[0] != 1):
+          if not(rq_set_sid(9, "1")):
+            popup("Gripper 1 must be connected to run this program.", False, False, True)
+          end
+          connectivity_checked[0] = 1
+        end
+        if (status_checked[0] != 1):
+          if not(rq_is_gripper_activated("1")):
+            popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+          end
+          status_checked[0] = 1
+        end
+        if (current_speed[0] != 0):
+          rq_set_speed_norm(0, "1")
+          current_speed[0] = 0
+        end
+        if (current_force[0] != 0):
+          rq_set_force_norm(0, "1")
+          current_force[0] = 0
+        end
+        rq_set_pos_norm(0, "1")
+        rq_go_to("1")
+        rq_wait("1")
+        # end: URCap Program Node
+        write_port_register(131,0)
+        write_port_register(130, 0)
+      end
+      sync()
+    end
   end
-  $ 31 "'Gripper motion completed'"
-  # 'Gripper motion completed'
-#  $ 32 "Popup"
-#  popup("Gripper motion completed", "Message", False, False, blocking=True)
-  $ 33 "Script Funtions"
-  $ 34 "Halt"
-  halt
-  $ 35 "Functions operating on a 0-100 span"
-  $ 36 "'Sets the gripper force [0-100]'"
-  # 'Sets the gripper force [0-100]'
-  $ 37 "rq_set_force_norm(50)"
-  rq_set_force_norm(50)
-  $ 38 "'Sets the gripper speed [0-100]'"
-  # 'Sets the gripper speed [0-100]'
-  $ 39 "rq_set_speed_norm(75)"
-  rq_set_speed_norm(75)
-  $ 40 "'Sends the partial move command and continue [0-100]'"
-  # 'Sends the partial move command and continue [0-100]'
-  $ 41 "rq_move_norm(75)"
-  rq_move_norm(75)
-  $ 42 "'Sends the partial move command and wait until completion. [0-100]'"
-  # 'Sends the partial move command and wait until completion. [0-100]'
-  $ 43 "rq_move_and_wait_norm(30)"
-  rq_move_and_wait_norm(30)
-  $ 44 "'Sets the target position [0-100]'"
-  # 'Sets the target position [0-100]'
-  $ 45 "rq_set_pos_norm(45)"
-  rq_set_pos_norm(45)
-  $ 46 "'Returns the gripper current position [0-100]'"
-  # 'Returns the gripper current position [0-100]'
-  $ 47 "position≔rq_current_pos_norm()"
-  global position=rq_current_pos_norm()
-  $ 48 "Functions operating on a 0-255 span"
-  $ 49 "'Sends the partial move command and wait until completion. [0-255]'"
-  # 'Sends the partial move command and wait until completion. [0-255]'
-  $ 50 "rq_move_and_wait(150)"
-  rq_move_and_wait(150)
-  $ 51 "'Sets the target position'"
-  # 'Sets the target position'
-  $ 52 "rq_set_pos(150)"
-  rq_set_pos(150)
-  $ 53 "'Returns the gripper current position [0-255]'"
-  # 'Returns the gripper current position [0-255]'
-  $ 54 "position≔rq_current_pos()"
-  global position=rq_current_pos()
-  $ 55 "'Sends the partial move command and continue'"
-  # 'Sends the partial move command and continue'
-  $ 56 "rq_move(150)"
-  rq_move(150)
-  $ 57 "'Sets the gripper speed [0-255]'"
-  # 'Sets the gripper speed [0-255]'
-  $ 58 "rq_set_speed(255)"
-  rq_set_speed(255)
-  $ 59 "'Sets the gripper force [0-255]'"
-  # 'Sets the gripper force [0-255]'
-  $ 60 "rq_set_force(255)"
-  rq_set_force(255)
-  $ 61 "Functions independant of the span"
-  $ 62 "'Activate the gripper if needed and wait for completion'"
-  # 'Activate the gripper if needed and wait for completion'
-  $ 63 "rq_activate_and_wait()"
-  rq_activate_and_wait()
-  $ 64 "'Activate the gripper and continue execution'"
-  # 'Activate the gripper and continue execution'
-  $ 65 "rq_activate()"
-  rq_activate()
-  $ 66 "'Wait the end of activation'"
-  # 'Wait the end of activation'
-  $ 67 "Wait rq_is_gripper_activated()"
-  while (not(rq_is_gripper_activated())):
-    sync()
+  eventThread = run EventThread()
+  while (True):
+    $ 5 "Robot Program"
+    $ 6 "knob≔1"
+    global knob=1
+    $ 7 "MoveJ"
+    $ 8 "robopoint_var"
+    movej(robopoint, a=1.3962634015954636, v=1.0471975511965976)
+    # begin: URCap Program Node
+    #   Source: Robotiq_Wrist_Camera, 1.2.1.R01, Robotiq Inc.
+    #   Type: Cam Locate
+    $ 9 "Camera Locate"
+    
+    ###########################################
+    #######VisionLocate node start########
+    
+    # Offset in translation only.
+    snapshot_position_offset[3] = 0
+    snapshot_position_offset[4] = 0
+    snapshot_position_offset[5] = 0
+    T_camera_in_flange = p[0, 0, 0, 0, 0, 0] # enlever une fois que l'enseignement du modele sera fait en faisant un movetool avec la pose de la camera dans le repere de la flange. Pour l'instant, on suppose que la camera est situee directement sur la flange.
+    tool = get_T_in_base_from_flange(T_camera_in_flange)
+    textmsg("actual tool flange : ", tool)
+    tool = pose_sub(tool, snapshot_position_offset)
+    textmsg("tool after offset : ", tool)
+    snapshot_position = p[0.318494, -0.105544, 0.853649, -1.74488, 1.71299, -0.679634]
+    textmsg("expected snapshot position : ", snapshot_position)
+    diff = pose_sub(tool, snapshot_position)
+    textmsg("diff = ", diff)
+    textmsg("norm([diff[0], diff[1], diff[2]]) = ", norm([diff[0], diff[1], diff[2]]))
+    textmsg("norm([diff[3], diff[4], diff[5]]) = ", norm([diff[3], diff[4], diff[5]]))
+    is_at_snapshot_position = norm([diff[0], diff[1], diff[2]]) < 0.002
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_at_snapshot_position = is_at_snapshot_position and (norm([diff[3], diff[4], diff[5]]) < 0.005)
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_snapshot_position_offset = norm(snapshot_position_offset) != 0
+    is_at_snapshot_position = is_at_snapshot_position or ignore_snapshot_position
+    if not(is_at_snapshot_position):
+      popup("Robot is not at Snapshot Position. Add Move instruction to Snapshot Position before Camera Locate node.. Error code: [UCC-8]", False, False, True)
+      halt
+    end
+    f = xmlrpc_server.findmodel("contextName-57037", tool[0], tool[1], tool[2], tool[3], tool[4], tool[5])
+    nbOccu = f[0]
+    logging_service.publish("FIND_MODEL", f)
+    object_teaching_location = p[0.6101428798365348, -0.09451710110491442, 0.09273116591211245, -2.213377325963746, 2.2291036583165127, -0.012478532071555928]
+    object_location = p[f[1], f[2], f[3], f[4], f[5], f[6]]
+    textmsg("object_location before offset = ", object_location)
+    object_location = pose_add(object_location, snapshot_position_offset)
+    textmsg("object_location after offset = ", object_location)
+    feature_teaching_reference = p[0.31849527102440145, -0.10553969576737585, 0.8536676766387312, -1.7448389490680207, 1.7129664518790022, -0.6796947542894476]
+    robopoint = pose_trans(object_location, pose_trans(pose_inv(p[0.6101428798365348, -0.09451710110491442, 0.09273116591211245, -2.213377325963746, 2.2291036583165127, -0.012478532071555928]), p[0.31849527102440145, -0.10553969576737585, 0.8536676766387312, -1.7448389490680207, 1.7129664518790022, -0.6796947542894476]))
+    if (nbOccu > 0.5):
+      $ 10 "If camera_locate≟0"
+      if (camera_locate == 0):
+        $ 11 "Popup"
+        popup("No Object Found", "Message", False, False, blocking=True)
+      end
+      $ 12 "knob≔object_location"
+      global knob=object_location
+      $ 13 "knob[2]=knob[2] + 0.185"
+      knob[2]=knob[2] + 0.185
+      $ 14 "MoveJ"
+      $ 15 "knob"
+      movej(knob, a=1.3962634015954636, v=1.0471975511965976)
+      $ 16 "b≔get_joint_positions()"
+      global b=get_joint_positions()
+      $ 17 "b[3]=b[3]+(0.5)"
+      b[3]=b[3]+(0.5)
+      $ 18 "b[5]=0"
+      b[5]=0
+      $ 19 "MoveJ"
+      $ 20 "b"
+      movej(b, a=1.3962634015954636, v=1.0471975511965976)
+      $ 21 "write_port_register(131,1)"
+      write_port_register(131,1)
+    end
+    # Restore snapshot position
+    robopoint = p[0.318494, -0.105544, 0.853649, -1.74488, 1.71299, -0.679634]
+    
+    #######VisionLocate node end########
+    ###########################################
+    
+    # end: URCap Program Node
   end
-  $ 68 "'Sends the open command and continue'"
-  # 'Sends the open command and continue'
-  $ 69 "rq_open()"
-  rq_open()
-  $ 70 "'Send the close command and continue'"
-  # 'Send the close command and continue'
-  $ 71 "rq_close()"
-  rq_close()
-  $ 72 "'Returns True if the motion is completed.'"
-  # 'Returns True if the motion is completed.'
-  $ 73 "motion_complete≔rq_is_motion_complete()"
-  global motion_complete=rq_is_motion_complete()
-  $ 74 "'Returns True if an object has been detected.'"
-  # 'Returns True if an object has been detected.'
-  $ 75 "object_detected≔rq_is_object_detected()"
-  global object_detected=rq_is_object_detected()
-  $ 76 "'Sends the open command and wait until completion'"
-  # 'Sends the open command and wait until completion'
-  $ 77 "rq_open_and_wait()"
-  rq_open_and_wait()
-  $ 78 "'Sends the close command and wait until completion'"
-  # 'Sends the close command and wait until completion'
-  $ 79 "rq_close_and_wait()"
-  rq_close_and_wait()
-  $ 80 "'Sets the goto bit to 1. Refer to user manual.'"
-  # 'Sets the goto bit to 1. Refer to user manual.'
-  $ 81 "rq_go_to()"
-  rq_go_to()
-  $ 82 "'Stops motion. The goto bit is cleared.'"
-  # 'Stops motion. The goto bit is cleared.'
-  $ 83 "rq_stop()"
-  rq_stop()
-  $ 84 "'Sends the closing autorelease instruction and wait until completion'"
-  # 'Sends the closing autorelease instruction and wait until completion'
-  $ 85 "rq_auto_release_close_and_wait()"
-  rq_auto_release_close_and_wait()
-  $ 86 "'Sends the opening autorelease instruction and wait until completion'"
-  # 'Sends the opening autorelease instruction and wait until completion'
-  $ 87 "rq_auto_release_open_and_wait()"
-  rq_auto_release_open_and_wait()
-  $ 88 "'Resets the activation status of the gripper. Use after an autorelease before activating the gripper.'"
-  # 'Resets the activation status of the gripper. Use after an autorelease before activating the gripper.'
-  $ 89 "rq_reset()"
-  rq_reset()
 end
