@@ -1,0 +1,1140 @@
+def thegreatcorholio():
+  set_standard_analog_input_domain(0, 1)
+  set_standard_analog_input_domain(1, 1)
+  set_tool_analog_input_domain(0, 1)
+  set_tool_analog_input_domain(1, 1)
+  set_analog_outputdomain(0, 0)
+  set_analog_outputdomain(1, 0)
+  set_tool_voltage(0)
+  set_input_actions_to_default()
+  set_tcp(p[0.0,0.0,0.0,0.0,0.0,0.0])
+  set_payload(0.0)
+  set_gravity([0.0, 0.0, 9.82])
+  global Base=p[0.0,0.0,0.0,0.0,0.0,0.0]
+  global Point_1=p[0.4930615595410374,-0.0928133248457419,0.5322282297867679,-1.8252497847666942,1.8974305151800839,-0.646496523378588]
+  global Point_2=p[0.42764382349584307,-0.0650987889209729,0.8253345058416383,-1.7611093276649576,1.9415878246994585,-0.5367506458142193]
+  rtde_set_watchdog("speed_slider_mask", 10.0, "pause")
+  # begin: URCap Installation Node
+  #   Source: Robotiq_Wrist_Camera, 1.2.1.R01, Robotiq Inc.
+  #   Type: Camera
+  
+  ###########################################
+  #######Vision urcap preamble start########
+  
+  logging_service = rpc_factory("xmlrpc","http://127.0.0.1:4747")
+  # Converts a pose relative to the flange in the base frame.
+  def get_T_in_base_from_flange(T_x_in_flange):
+  
+    T_flange_in_base = get_actual_tool_flange_pose()
+  
+    T_x_in_base = pose_trans(T_flange_in_base, T_x_in_flange)
+  
+    return T_x_in_base
+  end
+  
+  # Search pose cartesian (camera pose)
+  Point_1 = p[0.37486, -0.10699, 0.586636, -1.66488, 1.77436, -0.748407]
+  Point_2 = p[0.427647, -0.0651064, 0.825334, -1.76108, 1.94162, -0.536799]
+  T_camera_in_flange = p[0.0, 0.05, 0.05, -0.5, 0.0, 0.0]
+  snapshot_position_offset = p[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  ignore_snapshot_position = False
+  
+  # Open connection with vision service
+  xmlrpc_server=rpc_factory("xmlrpc","http://127.0.0.1:4242")
+  
+  #######Vision urcap preamble end##########
+  ###########################################
+  
+  # end: URCap Installation Node
+  # begin: URCap Installation Node
+  #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+  #   Type: Gripper
+  
+  ###########################################
+  #######Gripper URCap preamble start########
+  #######Version null########
+  
+  #aliases for the gripper variable names
+  ACT = 1
+  GTO = 2
+  ATR = 3
+  ARD = 4
+  FOR = 5
+  SPE = 6
+  OBJ = 7
+  STA = 8
+  FLT = 9
+  POS = 10
+  PRE = 11
+  
+  def rq_init_connection(gripper_sid=9, gripper_socket="1"):
+  	socket_open("127.0.0.1",63352, gripper_socket)
+  	socket_set_var("SID", gripper_sid,  gripper_socket)
+  	ack = socket_read_byte_list(3, gripper_socket)
+  end
+  
+  def rq_set_sid(gripper_sid=9, gripper_socket="1"):
+          socket_set_var("SID", gripper_sid,  gripper_socket)
+          sync()
+          return is_ack(socket_read_byte_list(3, gripper_socket))
+  end
+  
+  def rq_activate(gripper_socket="1"):
+  	rq_gripper_act = 0
+  
+          if (not rq_is_gripper_activated(gripper_socket)):
+              rq_reset(gripper_socket)
+          end
+  
+  	rq_set_var(ACT,1, gripper_socket)
+  end
+  
+  def rq_activate_and_wait(gripper_socket="1"):
+  	rq_activate(gripper_socket)
+  
+  	while(not rq_is_gripper_activated(gripper_socket)):
+  		# wait for activation completed
+  	end
+  end
+  
+  def rq_stop(gripper_socket="1"):
+  	rq_set_var(GTO,0, gripper_socket)
+  end
+  
+  def rq_reset(gripper_socket="1"):
+  	rq_gripper_act = 0
+  	rq_obj_detect = 0
+  	rq_mov_complete = 0
+  
+  	rq_set_var(ACT,0, gripper_socket)
+  	rq_set_var(ATR,0, gripper_socket)
+  end
+  
+  def rq_auto_release_open_and_wait(gripper_socket="1"):
+  
+  	rq_set_var(ARD,0, gripper_socket)
+  	rq_set_var(ACT,1, gripper_socket)
+  	rq_set_var(ATR,1, gripper_socket)
+  
+  	gFLT = rq_get_var(FLT, 2, gripper_socket)
+  
+  	while(not is_FLT_autorelease_completed(gFLT)):
+  		gFLT = rq_get_var(FLT, 2, gripper_socket)
+  	end
+  end
+  
+  def rq_auto_release_close_and_wait(gripper_socket="1"):
+  	rq_set_var(ARD,1, gripper_socket)
+  	rq_set_var(ACT,1, gripper_socket)
+  	rq_set_var(ATR,1, gripper_socket)
+  
+  	gFLT = rq_get_var(FLT, 2, gripper_socket)
+  
+  	while(not is_FLT_autorelease_completed(gFLT)):
+  		gFLT = rq_get_var(FLT, 2, gripper_socket)
+  	end
+  end
+  
+  def rq_set_force(force, gripper_socket="1"):
+  	rq_set_var(FOR,force, gripper_socket)
+  end
+  
+  def rq_set_speed(speed, gripper_socket="1"):
+  	rq_set_var(SPE,speed, gripper_socket)
+  end
+  
+  def rq_open(gripper_socket="1"):
+  	rq_move(0, gripper_socket)
+  end
+  
+  def rq_close(gripper_socket="1"):
+  	rq_move(255, gripper_socket)
+  end
+  
+  def rq_open_and_wait(gripper_socket="1"):
+  	rq_move_and_wait(0, gripper_socket)
+  end
+  
+  def rq_close_and_wait(gripper_socket="1"):
+  	rq_move_and_wait(255, gripper_socket)
+  end
+  
+  def rq_move(pos, gripper_socket="1"):
+  	rq_mov_complete = 0
+  	rq_obj_detect = 0
+  
+  	rq_set_pos(pos, gripper_socket)
+  	rq_go_to(gripper_socket)
+  end
+  
+  def rq_move_and_wait(pos, gripper_socket="1"):
+  	rq_move(pos, gripper_socket)
+  
+  	while (not rq_is_motion_complete(gripper_socket)):
+  		# wait for motion completed
+  		sleep(0.01)
+  		sync()
+  	end
+  
+  	# following code used for compatibility with previous versions
+  	rq_is_object_detected(gripper_socket)
+  
+  	if (rq_obj_detect != 1):
+  		rq_mov_complete = 1
+  	end
+  end
+  
+  def rq_wait(gripper_socket="1"):
+          # Wait for the gripper motion to complete
+          while (not rq_is_motion_complete(gripper_socket)):
+  		# wait for motion completed
+  		sleep(0.01)
+  		sync()
+  	end
+  
+  	# following code used for compatibility with previous versions
+  	rq_is_object_detected(gripper_socket)
+  
+  	if (rq_obj_detect != 1):
+  		rq_mov_complete = 1
+  	end
+  end
+  
+  def rq_go_to(gripper_socket="1"):
+  	rq_set_var(GTO,1, gripper_socket)
+  end
+  
+  # reset the rGTO to prevent movement and
+  # set the position
+  def rq_set_pos(pos, gripper_socket="1"):
+  	rq_set_var(GTO,0, gripper_socket)
+  
+  	rq_set_var(POS, pos, gripper_socket)
+  
+  	gPRE = rq_get_var(PRE, 3, gripper_socket)
+  	pre = (gPRE[1] - 48)*100 + (gPRE[2] -48)*10 + gPRE[3] - 48
+  	sync()
+  	while (pre != pos):
+          rq_set_var(POS, pos, gripper_socket)
+  		gPRE = rq_get_var(PRE, 3, gripper_socket)
+  		pre = (gPRE[1] - 48)*100 + (gPRE[2] -48)*10 + gPRE[3] - 48
+  		sync()
+  	end
+  end
+  
+  def rq_is_motion_complete(gripper_socket="1"):
+  	rq_mov_complete = 0
+  
+  	gOBJ = rq_get_var(OBJ, 1, gripper_socket)
+  	sleep(0.01)
+  
+  	if (is_OBJ_gripper_at_position(gOBJ)):
+  		rq_mov_complete = 1
+  		return True
+  	end
+  
+  	if (is_OBJ_object_detected(gOBJ)):
+  		rq_mov_complete = 1
+  		return True
+  	end
+  
+  	return False
+  
+  end
+  
+  def rq_is_gripper_activated(gripper_socket="1"):
+  	gSTA = rq_get_var(STA, 1, gripper_socket)
+  
+  	if(is_STA_gripper_activated(gSTA)):
+  		rq_gripper_act = 1
+  		return True
+  	else:
+  		rq_gripper_act = 0
+  		return False
+  	end
+  end
+  
+  def rq_is_object_detected(gripper_socket="1"):
+  	gOBJ = rq_get_var(OBJ, 1, gripper_socket)
+  
+  	if(is_OBJ_object_detected(gOBJ)):
+  		rq_obj_detect = 1
+  		return True
+  	else:
+  		rq_obj_detect = 0
+  		return False
+  	end
+  end
+  
+  def rq_current_pos(gripper_socket="1"):
+  	rq_pos = socket_get_var("POS",gripper_socket)
+  	sync()
+      return rq_pos
+  end
+  
+  def rq_print_gripper_fault_code(gripper_socket="1"):
+  	gFLT = rq_get_var(FLT, 2, gripper_socket)
+  
+  	if(is_FLT_no_fault(gFLT)):
+  		textmsg("Gripper Fault : ", "No Fault (0x00)")
+  	elif (is_FLT_action_delayed(gFLT)):
+  		textmsg("Gripper Fault : ", "Priority Fault: Action delayed, initialization must be completed prior to action (0x05)")
+  	elif (is_FLT_not_activated(gFLT)):
+  		textmsg("Gripper Fault : ", "Priority Fault: The activation must be set prior to action (0x07)")
+  	elif (is_FLT_autorelease_in_progress(gFLT)):
+  		textmsg("Gripper Fault : ", "Minor Fault: Automatic release in progress (0x0B)")
+  	elif (is_FLT_overcurrent(gFLT)):
+  		textmsg("Gripper Fault : ", "Minor Fault: Overcurrent protection tiggered (0x0E)")
+  	elif (is_FLT_autorelease_completed(gFLT)):
+  		textmsg("Gripper Fault : ", "Major Fault: Automatic release completed (0x0F)")
+  	else:
+  		textmsg("Gripper Fault : ", "Unkwown Fault")
+  	end
+  end
+  
+  def rq_print_gripper_num_cycles(gripper_socket="1"):
+  	socket_send_string("GET NCY",gripper_socket)
+  	sync()
+  	string_from_server = socket_read_string(gripper_socket)
+  	sync()
+  
+  	if(string_from_server == "0"):
+  		textmsg("Gripper Cycle Number : ", "Number of cycles is unreachable.")
+  	else:
+  		textmsg("Gripper Cycle Number : ", string_from_server)
+  	end
+  end
+  
+  def rq_print_gripper_driver_state(gripper_socket="1"):
+  	socket_send_string("GET DST",gripper_socket)
+  	sync()
+  	string_from_server = socket_read_string(gripper_socket)
+  	sync()
+  
+  	if(string_from_server == "0"):
+  		textmsg("Gripper Driver State : ", "RQ_STATE_INIT")
+  	elif(string_from_server == "1"):
+  		textmsg("Gripper Driver State : ", "RQ_STATE_LISTEN")
+  	elif(string_from_server == "2"):
+  		textmsg("Gripper Driver State : ", "RQ_STATE_READ_INFO")
+  	elif(string_from_server == "3"):
+  		textmsg("Gripper Driver State : ", "RQ_STATE_ACTIVATION")
+  	else:
+  		textmsg("Gripper Driver State : ", "RQ_STATE_RUN")
+  	end
+  end
+  
+  def rq_print_gripper_serial_number():
+  	#socket_send_string("GET SNU",gripper_socket)
+  	#sync()
+  	#string_from_server = socket_read_string(gripper_socket)
+  	#sync()
+  	#textmsg("Gripper Serial Number : ", string_from_server)
+  end
+  
+  def rq_print_gripper_firmware_version(gripper_socket="1"):
+  	socket_send_string("GET FWV",gripper_socket)
+  	sync()
+  	string_from_server = socket_read_string(gripper_socket)
+  	sync()
+  	textmsg("Gripper Firmware Version : ", string_from_server)
+  end
+  
+  def rq_print_gripper_driver_version(gripper_socket="1"):
+  	socket_send_string("GET VER",gripper_socket)
+  	sync()
+  	string_from_server = socket_read_string(gripper_socket)
+  	sync()
+  	textmsg("Gripper Driver Version : ", string_from_server)
+  end
+  
+  def rq_print_gripper_probleme_connection(gripper_socket="1"):
+  	socket_send_string("GET PCO",gripper_socket)
+  	sync()
+  	string_from_server = socket_read_string(gripper_socket)
+  	sync()
+  	if (string_from_server == "0"):
+  		textmsg("Gripper Connection State : ", "No connection problem detected")
+  	else:
+  		textmsg("Gripper Connection State : ", "Connection problem detected")
+  	end
+  end
+  
+  # Returns True if list_of_bytes is [3, 'a', 'c', 'k']
+  def is_ack(list_of_bytes):
+  
+  	# list length is not 3
+  	if (list_of_bytes[0] != 3):
+  		return False
+  	end
+  
+  	# first byte not is 'a'?
+  	if (list_of_bytes[1] != 97):
+  		return False
+  	end
+  
+  	# first byte not is 'c'?
+  	if (list_of_bytes[2] != 99):
+  		return False
+  	end
+  
+  	# first byte not is 'k'?
+  	if (list_of_bytes[3] != 107):
+  		return False
+  	end
+  
+  	return True
+  end
+  
+  # Returns True if list_of_bytes is not [3, 'a', 'c', 'k']
+  def is_not_ack(list_of_bytes):
+  	if (is_ack(list_of_bytes)):
+  		return False
+  	else:
+  		return True
+  	end
+  end
+  
+  def is_STA_gripper_activated (list_of_bytes):
+  
+  	# list length is not 1
+  	if (list_of_bytes[0] != 1):
+  		return False
+  	end
+  
+  	# byte is '3'?
+  	if (list_of_bytes[1] == 51):
+  		return True
+  	end
+  
+  	return False
+  end
+  
+  # Returns True if list_of_byte is [1, '1'] or [1, '2']
+  # Used to test OBJ = 0x1 or OBJ = 0x2
+  def is_OBJ_object_detected (list_of_bytes):
+  
+  	# list length is not 1
+  	if (list_of_bytes[0] != 1):
+  		return False
+  	end
+  
+  	# byte is '2'?
+  	if (list_of_bytes[1] == 50):
+  		return True
+  	end
+  
+  	# byte is '1'?
+  	if (list_of_bytes[1]  == 49):
+  		return True
+  	end
+  
+  	return False
+  
+  end
+  
+  # Returns True if list_of_byte is [1, '3']
+  # Used to test OBJ = 0x3
+  def is_OBJ_gripper_at_position (list_of_bytes):
+  
+  	# list length is not 1
+  	if (list_of_bytes[0] != 1):
+  		return False
+  	end
+  
+  	# byte is '3'?
+  	if (list_of_bytes[1] == 51):
+  		return True
+  	end
+  
+  	return False
+  end
+  
+  def is_not_OBJ_gripper_at_position (list_of_bytes):
+  
+  	if (is_OBJ_gripper_at_position(list_of_bytes)):
+  		return False
+  	else:
+  		return True
+  	end
+  end
+  
+  def is_FLT_no_fault(list_of_bytes):
+  
+  	# list length is not 2
+  	if (list_of_bytes[0] != 2):
+  		return False
+  	end
+  
+  	# first byte is '0'?
+  	if (list_of_bytes[1] != 48):
+  		return False
+  	end
+  
+  	# second byte is '0'?
+  	if (list_of_bytes[2] != 48):
+  		return False
+  	end
+  
+  	return True
+  
+  end
+  
+  def is_FLT_action_delayed(list_of_bytes):
+  
+  	# list length is not 2
+  	if (list_of_bytes[0] != 2):
+  		return False
+  	end
+  
+  	# first byte is '0'?
+  	if (list_of_bytes[1] != 48):
+  		return False
+  	end
+  
+  	# second byte is '5'?
+  	if (list_of_bytes[2] != 53):
+  		return False
+  	end
+  
+  	return True
+  end
+  
+  def is_FLT_not_activated(list_of_bytes):
+  
+  	# list length is not 2
+  	if (list_of_bytes[0] != 2):
+  		return False
+  	end
+  
+  	# first byte is '0'?
+  	if (list_of_bytes[1] != 48):
+  		return False
+  	end
+  
+  	# second byte is '7'?
+  	if (list_of_bytes[2] != 55):
+  		return False
+  	end
+  
+  	return True
+  end
+  
+  def is_FLT_autorelease_in_progress(list_of_bytes):
+  
+  	# list length is not 2
+  	if (list_of_bytes[0] != 2):
+  		return False
+  	end
+  
+  	# first byte is '1'?
+  	if (list_of_bytes[1] != 49):
+  		return False
+  	end
+  
+  	# second byte is '1'?
+  	if (list_of_bytes[2] != 49):
+  		return False
+  	end
+  
+  	return True
+  
+  end
+  
+  def is_FLT_overcurrent(list_of_bytes):
+  
+  	# list length is not 2
+  	if (list_of_bytes[0] != 2):
+  		return False
+  	end
+  
+  	# first byte is '1'?
+  	if (list_of_bytes[1] != 49):
+  		return False
+  	end
+  
+  	# second byte is '4'?
+  	if (list_of_bytes[2] != 52):
+  		return False
+  	end
+  
+  	return True
+  
+  end
+  
+  def is_FLT_autorelease_completed(list_of_bytes):
+  
+  	# list length is not 2
+  	if (list_of_bytes[0] != 2):
+  		return False
+  	end
+  
+  	# first byte is '1'?
+  	if (list_of_bytes[1] != 49):
+  		return False
+  	end
+  
+  	# second byte is '5'?
+  	if (list_of_bytes[2] != 53):
+  		return False
+  	end
+  
+  	return True
+  
+  end
+  
+  def rq_set_var(var_name, var_value, gripper_socket="1"):
+  
+  	sync()
+  	if (var_name == ACT):
+  		socket_set_var("ACT", var_value, gripper_socket)
+  	elif (var_name == GTO):
+  		socket_set_var("GTO", var_value, gripper_socket)
+  	elif (var_name == ATR):
+  		socket_set_var("ATR", var_value, gripper_socket)
+  	elif (var_name == ARD):
+  		socket_set_var("ARD", var_value, gripper_socket)
+  	elif (var_name == FOR):
+  		socket_set_var("FOR", var_value, gripper_socket)
+  	elif (var_name == SPE):
+  		socket_set_var("SPE", var_value, gripper_socket)
+  	elif (var_name == POS):
+  		socket_set_var("POS", var_value, gripper_socket)
+  	else:
+  	end
+  
+  	sync()
+  	ack = socket_read_byte_list(3, gripper_socket)
+  	sync()
+  
+  	while(is_not_ack(ack)):
+  
+  		textmsg("rq_set_var : retry", " ...")
+  		textmsg("rq_set_var : var_name = ", var_name)
+  		textmsg("rq_set_var : var_value = ", var_value)
+  
+  		if (ack[0] != 0):
+  			textmsg("rq_set_var : invalid ack value = ", ack)
+  		end
+  
+  		socket_set_var(var_name , var_value,gripper_socket)
+  		sync()
+  		ack = socket_read_byte_list(3, gripper_socket)
+  		sync()
+  	end
+  end
+  
+  
+  def rq_get_var(var_name, nbr_bytes, gripper_socket="1"):
+  
+  	if (var_name == FLT):
+  		socket_send_string("GET FLT",gripper_socket)
+  		sync()
+  	elif (var_name == OBJ):
+  		socket_send_string("GET OBJ",gripper_socket)
+  		sync()
+  	elif (var_name == STA):
+  		socket_send_string("GET STA",gripper_socket)
+  		sync()
+  	elif (var_name == PRE):
+  		socket_send_string("GET PRE",gripper_socket)
+  		sync()
+  	else:
+  	end
+  
+  	var_value = socket_read_byte_list(nbr_bytes, gripper_socket)
+  	sync()
+  
+  	return var_value
+  end
+  
+  ############################################
+  # normalized functions (maps 0-100 to 0-255)
+  ############################################
+  def rq_set_force_norm(force_norm, gripper_socket="1"):
+      force_gripper = norm_to_gripper(force_norm)
+      rq_set_force(force_gripper, gripper_socket)
+  end
+  
+  def rq_set_speed_norm(speed_norm, gripper_socket="1"):
+      speed_gripper = norm_to_gripper(speed_norm)
+      rq_set_speed(speed_gripper, gripper_socket)
+  end
+  
+  def rq_move_norm(pos_norm, gripper_socket="1"):
+      pos_gripper = norm_to_gripper(pos_norm)
+      rq_move(pos_gripper, gripper_socket)
+  end
+  
+  def rq_move_and_wait_norm(pos_norm, gripper_socket="1"):
+      pos_gripper = norm_to_gripper(pos_norm)
+      rq_move_and_wait(pos_gripper, gripper_socket)
+  end
+  
+  def rq_set_pos_norm(pos_norm, gripper_socket="1"):
+      pos_gripper = norm_to_gripper(pos_norm)
+      rq_set_pos(pos_gripper, gripper_socket)
+  end
+  
+  
+  def rq_current_pos_norm(gripper_socket="1"):
+      pos_gripper = rq_current_pos(gripper_socket)
+      pos_norm = gripper_to_norm(pos_gripper)
+      return pos_norm
+  end
+  
+  def gripper_to_norm(value_gripper):
+      value_norm = (value_gripper / 255) * 100
+      return floor(value_norm)
+  end
+  
+  def norm_to_gripper(value_norm):
+      value_gripper = (value_norm / 100) * 255
+      return ceil(value_gripper)
+  end
+  
+  def rq_get_position():
+      return rq_current_pos_norm()
+  end
+  #########################################
+  rq_obj_detect = 0
+  rq_init_connection(9, "1")
+  connectivity_checked = [-1,-1,-1,-1]
+  status_checked = [-1,-1,-1,-1]
+  current_speed = [-1,-1,-1,-1]
+  current_force = [-1,-1,-1,-1]
+  
+  #######Gripper URCap preamble end##########
+  ###########################################
+  
+  # end: URCap Installation Node
+  while (True):
+    $ 1 "Robot Program"
+    $ 2 "MoveJ"
+    $ 3 "Point_1_var"
+    movej(Point_1, a=1.3962634015954636, v=1.0471975511965976)
+    # begin: URCap Program Node
+    #   Source: Robotiq_Wrist_Camera, 1.2.1.R01, Robotiq Inc.
+    #   Type: Cam Locate
+    $ 4 "Camera Locate"
+    
+    ###########################################
+    #######VisionLocate node start########
+    
+    # Offset in translation only.
+    snapshot_position_offset[3] = 0
+    snapshot_position_offset[4] = 0
+    snapshot_position_offset[5] = 0
+    T_camera_in_flange = p[0, 0, 0, 0, 0, 0] # enlever une fois que l'enseignement du modele sera fait en faisant un movetool avec la pose de la camera dans le repere de la flange. Pour l'instant, on suppose que la camera est situee directement sur la flange.
+    tool = get_T_in_base_from_flange(T_camera_in_flange)
+    textmsg("actual tool flange : ", tool)
+    tool = pose_sub(tool, snapshot_position_offset)
+    textmsg("tool after offset : ", tool)
+    snapshot_position = p[0.427647, -0.0651064, 0.825334, -1.76108, 1.94162, -0.536799]
+    textmsg("expected snapshot position : ", snapshot_position)
+    diff = pose_sub(tool, snapshot_position)
+    textmsg("diff = ", diff)
+    textmsg("norm([diff[0], diff[1], diff[2]]) = ", norm([diff[0], diff[1], diff[2]]))
+    textmsg("norm([diff[3], diff[4], diff[5]]) = ", norm([diff[3], diff[4], diff[5]]))
+    is_at_snapshot_position = norm([diff[0], diff[1], diff[2]]) < 0.002
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_at_snapshot_position = is_at_snapshot_position and (norm([diff[3], diff[4], diff[5]]) < 0.005)
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_snapshot_position_offset = norm(snapshot_position_offset) != 0
+    is_at_snapshot_position = is_at_snapshot_position or ignore_snapshot_position
+    if not(is_at_snapshot_position):
+      popup("Robot is not at Snapshot Position. Add Move instruction to Snapshot Position before Camera Locate node.. Error code: [UCC-8]", False, False, True)
+      halt
+    end
+    f = xmlrpc_server.findmodel("contextName-41958", tool[0], tool[1], tool[2], tool[3], tool[4], tool[5])
+    nbOccu = f[0]
+    logging_service.publish("FIND_MODEL", f)
+    object_teaching_location = p[0.5006944689851418, 0.0021285573133887734, 0.08807517628550185, -2.1500561872051382, 2.2846857448068327, -0.007878251568676636]
+    object_location = p[f[1], f[2], f[3], f[4], f[5], f[6]]
+    textmsg("object_location before offset = ", object_location)
+    object_location = pose_add(object_location, snapshot_position_offset)
+    textmsg("object_location after offset = ", object_location)
+    feature_teaching_reference = p[0.42764382349584307, -0.0650987889209729, 0.8253345058416383, -1.7611093276649576, 1.9415878246994585, -0.5367506458142193]
+    Point_2 = pose_trans(object_location, pose_trans(pose_inv(p[0.5006944689851418, 0.0021285573133887734, 0.08807517628550185, -2.1500561872051382, 2.2846857448068327, -0.007878251568676636]), p[0.42764382349584307, -0.0650987889209729, 0.8253345058416383, -1.7611093276649576, 1.9415878246994585, -0.5367506458142193]))
+    if (nbOccu > 0.5):
+      $ 5 "redtargetpos≔object_location"
+      global redtargetpos=object_location
+      $ 6 "redtargetpos[2]=redtargetpos[2]+0.2"
+      redtargetpos[2]=redtargetpos[2]+0.2
+      $ 7 "MoveJ"
+      $ 8 "redtargetpos"
+      movej(redtargetpos, a=1.3962634015954636, v=1.0471975511965976)
+      # begin: URCap Program Node
+      #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+      #   Type: Gripper
+      $ 9 "Gripper Close (1)"
+      if (connectivity_checked[0] != 1):
+        if not(rq_set_sid(9, "1")):
+          popup("Gripper 1 must be connected to run this program.", False, False, True)
+        end
+        connectivity_checked[0] = 1
+      end
+      if (status_checked[0] != 1):
+        if not(rq_is_gripper_activated("1")):
+          popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+        end
+        status_checked[0] = 1
+      end
+      if (current_speed[0] != 0):
+        rq_set_speed_norm(0, "1")
+        current_speed[0] = 0
+      end
+      if (current_force[0] != 0):
+        rq_set_force_norm(0, "1")
+        current_force[0] = 0
+      end
+      rq_set_pos_norm(100, "1")
+      rq_go_to("1")
+      rq_wait("1")
+      # end: URCap Program Node
+      $ 10 "MoveJ"
+      $ 11 "Waypoint_3"
+      movej([0.8950539733597545, -1.437289063130514, -0.9856144317247768, -0.9015338123178616, 1.5163354148274086, 0.06752249598503113], a=1.3962634015954636, v=1.0471975511965976)
+      $ 12 "Waypoint_2"
+      movej([0.9507911544169767, -2.30201853535558, -0.6606437095262905, -0.6770756981663961, 1.7081303337823188, 0.10677832365036011], a=1.3962634015954636, v=1.0471975511965976)
+      # begin: URCap Program Node
+      #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+      #   Type: Gripper
+      $ 13 "Gripper Open (1)"
+      if (connectivity_checked[0] != 1):
+        if not(rq_set_sid(9, "1")):
+          popup("Gripper 1 must be connected to run this program.", False, False, True)
+        end
+        connectivity_checked[0] = 1
+      end
+      if (status_checked[0] != 1):
+        if not(rq_is_gripper_activated("1")):
+          popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+        end
+        status_checked[0] = 1
+      end
+      if (current_speed[0] != 0):
+        rq_set_speed_norm(0, "1")
+        current_speed[0] = 0
+      end
+      if (current_force[0] != 0):
+        rq_set_force_norm(0, "1")
+        current_force[0] = 0
+      end
+      rq_set_pos_norm(0, "1")
+      rq_go_to("1")
+      rq_wait("1")
+      # end: URCap Program Node
+    end
+    # Restore snapshot position
+    Point_2 = p[0.427647, -0.0651064, 0.825334, -1.76108, 1.94162, -0.536799]
+    
+    #######VisionLocate node end########
+    ###########################################
+    
+    # end: URCap Program Node
+    $ 14 "MoveJ"
+    $ 15 "Point_2_var"
+    movej(Point_2, a=1.3962634015954636, v=1.0471975511965976)
+    # begin: URCap Program Node
+    #   Source: Robotiq_Wrist_Camera, 1.2.1.R01, Robotiq Inc.
+    #   Type: Cam Locate
+    $ 16 "Camera Locate"
+    
+    ###########################################
+    #######VisionLocate node start########
+    
+    # Offset in translation only.
+    snapshot_position_offset[3] = 0
+    snapshot_position_offset[4] = 0
+    snapshot_position_offset[5] = 0
+    T_camera_in_flange = p[0, 0, 0, 0, 0, 0] # enlever une fois que l'enseignement du modele sera fait en faisant un movetool avec la pose de la camera dans le repere de la flange. Pour l'instant, on suppose que la camera est situee directement sur la flange.
+    tool = get_T_in_base_from_flange(T_camera_in_flange)
+    textmsg("actual tool flange : ", tool)
+    tool = pose_sub(tool, snapshot_position_offset)
+    textmsg("tool after offset : ", tool)
+    snapshot_position = p[0.427647, -0.0651064, 0.825334, -1.76108, 1.94162, -0.536799]
+    textmsg("expected snapshot position : ", snapshot_position)
+    diff = pose_sub(tool, snapshot_position)
+    textmsg("diff = ", diff)
+    textmsg("norm([diff[0], diff[1], diff[2]]) = ", norm([diff[0], diff[1], diff[2]]))
+    textmsg("norm([diff[3], diff[4], diff[5]]) = ", norm([diff[3], diff[4], diff[5]]))
+    is_at_snapshot_position = norm([diff[0], diff[1], diff[2]]) < 0.002
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_at_snapshot_position = is_at_snapshot_position and (norm([diff[3], diff[4], diff[5]]) < 0.005)
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_snapshot_position_offset = norm(snapshot_position_offset) != 0
+    is_at_snapshot_position = is_at_snapshot_position or ignore_snapshot_position
+    if not(is_at_snapshot_position):
+      popup("Robot is not at Snapshot Position. Add Move instruction to Snapshot Position before Camera Locate node.. Error code: [UCC-8]", False, False, True)
+      halt
+    end
+    f = xmlrpc_server.findmodel("contextName-97051", tool[0], tool[1], tool[2], tool[3], tool[4], tool[5])
+    nbOccu = f[0]
+    logging_service.publish("FIND_MODEL", f)
+    object_teaching_location = p[0.417037727140911, -0.14614485500350757, 0.08867314909149729, -2.150056187198523, 2.2846857448130575, -0.007878251568675375]
+    object_location = p[f[1], f[2], f[3], f[4], f[5], f[6]]
+    textmsg("object_location before offset = ", object_location)
+    object_location = pose_add(object_location, snapshot_position_offset)
+    textmsg("object_location after offset = ", object_location)
+    feature_teaching_reference = p[0.42764382349584307, -0.0650987889209729, 0.8253345058416383, -1.7611093276649576, 1.9415878246994585, -0.5367506458142193]
+    Point_2 = pose_trans(object_location, pose_trans(pose_inv(p[0.417037727140911, -0.14614485500350757, 0.08867314909149729, -2.150056187198523, 2.2846857448130575, -0.007878251568675375]), p[0.42764382349584307, -0.0650987889209729, 0.8253345058416383, -1.7611093276649576, 1.9415878246994585, -0.5367506458142193]))
+    if (nbOccu > 0.5):
+      $ 17 "grtargetpos≔object_location"
+      global grtargetpos=object_location
+      $ 18 "grtargetpos[2]=grtargetpos[2]+0.2"
+      grtargetpos[2]=grtargetpos[2]+0.2
+      $ 19 "MoveJ"
+      $ 20 "grtargetpos"
+      movej(grtargetpos, a=1.3962634015954636, v=1.0471975511965976)
+      # begin: URCap Program Node
+      #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+      #   Type: Gripper
+      $ 21 "Gripper Close (1)"
+      if (connectivity_checked[0] != 1):
+        if not(rq_set_sid(9, "1")):
+          popup("Gripper 1 must be connected to run this program.", False, False, True)
+        end
+        connectivity_checked[0] = 1
+      end
+      if (status_checked[0] != 1):
+        if not(rq_is_gripper_activated("1")):
+          popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+        end
+        status_checked[0] = 1
+      end
+      if (current_speed[0] != 0):
+        rq_set_speed_norm(0, "1")
+        current_speed[0] = 0
+      end
+      if (current_force[0] != 0):
+        rq_set_force_norm(0, "1")
+        current_force[0] = 0
+      end
+      rq_set_pos_norm(100, "1")
+      rq_go_to("1")
+      rq_wait("1")
+      # end: URCap Program Node
+      $ 22 "MoveJ"
+      $ 23 "Waypoint_3"
+      movej([0.8950539733597545, -1.437289063130514, -0.9856144317247768, -0.9015338123178616, 1.5163354148274086, 0.06752249598503113], a=1.3962634015954636, v=1.0471975511965976)
+      $ 24 "Waypoint_1"
+      movej([1.2642439095488516, -2.0028453514979994, -1.020554504451118, -0.9507375084420282, 1.7199115494500425, 0.10551998019218445], a=1.3962634015954636, v=1.0471975511965976)
+      # begin: URCap Program Node
+      #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+      #   Type: Gripper
+      $ 25 "Gripper Open (1)"
+      if (connectivity_checked[0] != 1):
+        if not(rq_set_sid(9, "1")):
+          popup("Gripper 1 must be connected to run this program.", False, False, True)
+        end
+        connectivity_checked[0] = 1
+      end
+      if (status_checked[0] != 1):
+        if not(rq_is_gripper_activated("1")):
+          popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+        end
+        status_checked[0] = 1
+      end
+      if (current_speed[0] != 0):
+        rq_set_speed_norm(0, "1")
+        current_speed[0] = 0
+      end
+      if (current_force[0] != 0):
+        rq_set_force_norm(0, "1")
+        current_force[0] = 0
+      end
+      rq_set_pos_norm(0, "1")
+      rq_go_to("1")
+      rq_wait("1")
+      # end: URCap Program Node
+    end
+    # Restore snapshot position
+    Point_2 = p[0.427647, -0.0651064, 0.825334, -1.76108, 1.94162, -0.536799]
+    
+    #######VisionLocate node end########
+    ###########################################
+    
+    # end: URCap Program Node
+    $ 26 "MoveJ"
+    $ 27 "Point_2_var"
+    movej(Point_2, a=1.3962634015954636, v=1.0471975511965976)
+    # begin: URCap Program Node
+    #   Source: Robotiq_Wrist_Camera, 1.2.1.R01, Robotiq Inc.
+    #   Type: Cam Locate
+    $ 28 "Camera Locate"
+    
+    ###########################################
+    #######VisionLocate node start########
+    
+    # Offset in translation only.
+    snapshot_position_offset[3] = 0
+    snapshot_position_offset[4] = 0
+    snapshot_position_offset[5] = 0
+    T_camera_in_flange = p[0, 0, 0, 0, 0, 0] # enlever une fois que l'enseignement du modele sera fait en faisant un movetool avec la pose de la camera dans le repere de la flange. Pour l'instant, on suppose que la camera est situee directement sur la flange.
+    tool = get_T_in_base_from_flange(T_camera_in_flange)
+    textmsg("actual tool flange : ", tool)
+    tool = pose_sub(tool, snapshot_position_offset)
+    textmsg("tool after offset : ", tool)
+    snapshot_position = p[0.427647, -0.0651064, 0.825334, -1.76108, 1.94162, -0.536799]
+    textmsg("expected snapshot position : ", snapshot_position)
+    diff = pose_sub(tool, snapshot_position)
+    textmsg("diff = ", diff)
+    textmsg("norm([diff[0], diff[1], diff[2]]) = ", norm([diff[0], diff[1], diff[2]]))
+    textmsg("norm([diff[3], diff[4], diff[5]]) = ", norm([diff[3], diff[4], diff[5]]))
+    is_at_snapshot_position = norm([diff[0], diff[1], diff[2]]) < 0.002
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_at_snapshot_position = is_at_snapshot_position and (norm([diff[3], diff[4], diff[5]]) < 0.005)
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_snapshot_position_offset = norm(snapshot_position_offset) != 0
+    is_at_snapshot_position = is_at_snapshot_position or ignore_snapshot_position
+    if not(is_at_snapshot_position):
+      popup("Robot is not at Snapshot Position. Add Move instruction to Snapshot Position before Camera Locate node.. Error code: [UCC-8]", False, False, True)
+      halt
+    end
+    f = xmlrpc_server.findmodel("contextName-74289", tool[0], tool[1], tool[2], tool[3], tool[4], tool[5])
+    nbOccu = f[0]
+    logging_service.publish("FIND_MODEL", f)
+    object_teaching_location = p[0.47940336309808673, -0.03758452833265012, 0.09317682917355449, -2.150056187206422, 2.284685744805659, -0.00787825156863689]
+    object_location = p[f[1], f[2], f[3], f[4], f[5], f[6]]
+    textmsg("object_location before offset = ", object_location)
+    object_location = pose_add(object_location, snapshot_position_offset)
+    textmsg("object_location after offset = ", object_location)
+    feature_teaching_reference = p[0.42764382349584307, -0.0650987889209729, 0.8253345058416383, -1.7611093276649576, 1.9415878246994585, -0.5367506458142193]
+    Point_2 = pose_trans(object_location, pose_trans(pose_inv(p[0.47940336309808673, -0.03758452833265012, 0.09317682917355449, -2.150056187206422, 2.284685744805659, -0.00787825156863689]), p[0.42764382349584307, -0.0650987889209729, 0.8253345058416383, -1.7611093276649576, 1.9415878246994585, -0.5367506458142193]))
+    if (nbOccu > 0.5):
+      $ 29 "yetargetpos≔object_location"
+      global yetargetpos=object_location
+      $ 30 "yetargetpos[2]=yetargetpos[2]+0.2"
+      yetargetpos[2]=yetargetpos[2]+0.2
+      $ 31 "MoveJ"
+      $ 32 "yetargetpos"
+      movej(yetargetpos, a=1.3962634015954636, v=1.0471975511965976)
+      # begin: URCap Program Node
+      #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+      #   Type: Gripper
+      $ 33 "Gripper Close (1)"
+      if (connectivity_checked[0] != 1):
+        if not(rq_set_sid(9, "1")):
+          popup("Gripper 1 must be connected to run this program.", False, False, True)
+        end
+        connectivity_checked[0] = 1
+      end
+      if (status_checked[0] != 1):
+        if not(rq_is_gripper_activated("1")):
+          popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+        end
+        status_checked[0] = 1
+      end
+      if (current_speed[0] != 0):
+        rq_set_speed_norm(0, "1")
+        current_speed[0] = 0
+      end
+      if (current_force[0] != 0):
+        rq_set_force_norm(0, "1")
+        current_force[0] = 0
+      end
+      rq_set_pos_norm(100, "1")
+      rq_go_to("1")
+      rq_wait("1")
+      # end: URCap Program Node
+      $ 34 "MoveJ"
+      $ 35 "Waypoint_3"
+      movej([0.8950539733597545, -1.437289063130514, -0.9856144317247768, -0.9015338123178616, 1.5163354148274086, 0.06752249598503113], a=1.3962634015954636, v=1.0471975511965976)
+      $ 36 "Waypoint_4"
+      movej([1.726259469985962, -1.8636929971622394, -1.1830116982702243, -1.009509683817516, 1.474197532771941, 0.1056276540154795], a=1.3962634015954636, v=1.0471975511965976)
+      # begin: URCap Program Node
+      #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.2, Robotiq Inc.
+      #   Type: Gripper
+      $ 37 "Gripper Open (1)"
+      if (connectivity_checked[0] != 1):
+        if not(rq_set_sid(9, "1")):
+          popup("Gripper 1 must be connected to run this program.", False, False, True)
+        end
+        connectivity_checked[0] = 1
+      end
+      if (status_checked[0] != 1):
+        if not(rq_is_gripper_activated("1")):
+          popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+        end
+        status_checked[0] = 1
+      end
+      if (current_speed[0] != 0):
+        rq_set_speed_norm(0, "1")
+        current_speed[0] = 0
+      end
+      if (current_force[0] != 0):
+        rq_set_force_norm(0, "1")
+        current_force[0] = 0
+      end
+      rq_set_pos_norm(0, "1")
+      rq_go_to("1")
+      rq_wait("1")
+      # end: URCap Program Node
+    end
+    # Restore snapshot position
+    Point_2 = p[0.427647, -0.0651064, 0.825334, -1.76108, 1.94162, -0.536799]
+    
+    #######VisionLocate node end########
+    ###########################################
+    
+    # end: URCap Program Node
+    $ 38 "MoveJ"
+    $ 39 "Point_2_var"
+    movej(Point_2, a=1.3962634015954636, v=1.0471975511965976)
+    # begin: URCap Program Node
+    #   Source: Robotiq_Wrist_Camera, 1.2.1.R01, Robotiq Inc.
+    #   Type: Cam Locate
+    $ 40 "Camera Locate"
+    
+    ###########################################
+    #######VisionLocate node start########
+    
+    # Offset in translation only.
+    snapshot_position_offset[3] = 0
+    snapshot_position_offset[4] = 0
+    snapshot_position_offset[5] = 0
+    T_camera_in_flange = p[0, 0, 0, 0, 0, 0] # enlever une fois que l'enseignement du modele sera fait en faisant un movetool avec la pose de la camera dans le repere de la flange. Pour l'instant, on suppose que la camera est situee directement sur la flange.
+    tool = get_T_in_base_from_flange(T_camera_in_flange)
+    textmsg("actual tool flange : ", tool)
+    tool = pose_sub(tool, snapshot_position_offset)
+    textmsg("tool after offset : ", tool)
+    snapshot_position = p[0.427647, -0.0651064, 0.825334, -1.76108, 1.94162, -0.536799]
+    textmsg("expected snapshot position : ", snapshot_position)
+    diff = pose_sub(tool, snapshot_position)
+    textmsg("diff = ", diff)
+    textmsg("norm([diff[0], diff[1], diff[2]]) = ", norm([diff[0], diff[1], diff[2]]))
+    textmsg("norm([diff[3], diff[4], diff[5]]) = ", norm([diff[3], diff[4], diff[5]]))
+    is_at_snapshot_position = norm([diff[0], diff[1], diff[2]]) < 0.002
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_at_snapshot_position = is_at_snapshot_position and (norm([diff[3], diff[4], diff[5]]) < 0.005)
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_snapshot_position_offset = norm(snapshot_position_offset) != 0
+    is_at_snapshot_position = is_at_snapshot_position or ignore_snapshot_position
+    if not(is_at_snapshot_position):
+      popup("Robot is not at Snapshot Position. Add Move instruction to Snapshot Position before Camera Locate node.. Error code: [UCC-8]", False, False, True)
+      halt
+    end
+    f = xmlrpc_server.findmodel("contextName-87822", tool[0], tool[1], tool[2], tool[3], tool[4], tool[5])
+    nbOccu = f[0]
+    logging_service.publish("FIND_MODEL", f)
+    object_teaching_location = p[0.5121040443489275, -0.09797094037606112, 0.08660788730326113, -2.15005618719729, 2.2846857448142774, -0.007878251568570388]
+    object_location = p[f[1], f[2], f[3], f[4], f[5], f[6]]
+    textmsg("object_location before offset = ", object_location)
+    object_location = pose_add(object_location, snapshot_position_offset)
+    textmsg("object_location after offset = ", object_location)
+    feature_teaching_reference = p[0.42764382349584307, -0.0650987889209729, 0.8253345058416383, -1.7611093276649576, 1.9415878246994585, -0.5367506458142193]
+    Point_2 = pose_trans(object_location, pose_trans(pose_inv(p[0.5121040443489275, -0.09797094037606112, 0.08660788730326113, -2.15005618719729, 2.2846857448142774, -0.007878251568570388]), p[0.42764382349584307, -0.0650987889209729, 0.8253345058416383, -1.7611093276649576, 1.9415878246994585, -0.5367506458142193]))
+    if (nbOccu > 0.5):
+      $ 41 "Halt"
+      halt
+    end
+    # Restore snapshot position
+    Point_2 = p[0.427647, -0.0651064, 0.825334, -1.76108, 1.94162, -0.536799]
+    
+    #######VisionLocate node end########
+    ###########################################
+    
+    # end: URCap Program Node
+  end
+end

@@ -41,7 +41,11 @@ def gripper_tutorial2():
   POS = 10
   PRE = 11
   
+<<<<<<< HEAD
   def rq_init_connection(gripper_sid=9, gripper_socket="1"): 
+=======
+  def rq_init_connection(gripper_sid=9, gripper_socket="1"):
+>>>>>>> 59c8476da14b66b957a4fe69c7a6ec6a8dc0bb66
   	socket_open("127.0.0.1",63352, gripper_socket)
   	socket_set_var("SID", gripper_sid,  gripper_socket)
   	ack = socket_read_byte_list(3, gripper_socket)
