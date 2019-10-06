@@ -1,9 +1,9 @@
 #!/usr/bin/python
-"""
-  Control of UR5 from Universal Robots
-    usage:
-         ./ur5.py <cmd> [<log file>]
-"""
+# """
+#   Control of UR5 from Universal Robots
+#     usage:
+#          ./ur5.py <cmd> [<log file>]
+# """
 
 # http://www.zacobria.com/universal-robots-zacobria-forum-hints-tips-how-to/script-via-socket-connection/
 
@@ -30,7 +30,7 @@ HAND_ANGLES_STR = "%f, %f, %f" % HAND_ANGLES
 SCAN_TOP_XYZ = 0.3, 0.1, 0.6
 SCAN_BOTTOM_XYZ = 0.3, 0.1, 0.1
 
-def parseData( data, robot=None, verbose=False ):
+def parseData(data, robot=None, verbose=False ):
     if len(data) < 5:
         return None
     totalLen, robotState = struct.unpack(">IB", data[:5] )
@@ -54,7 +54,7 @@ def parseData( data, robot=None, verbose=False ):
             if robot:
                 robot.timestamp = timestamp
             if verbose:
-                print timestamp, targetSpeedFraction, speedScaling
+                print(timestamp, targetSpeedFraction, speedScaling)
         elif packageType == 1:
             # Joint Data
             assert subLen == 251, subLen
@@ -66,19 +66,19 @@ def parseData( data, robot=None, verbose=False ):
                 sumSpeed += abs(speed)
                 # 253 running mode
             if verbose:
-                print "sumSpeed", sumSpeed
+                print("sumSpeed", sumSpeed)
             if robot:
                 robot.moving = (sumSpeed > 0.000111)
         elif packageType == 2:
             # Tool Data
             assert subLen == 37, subLen
             if verbose:
-                print "Tool", struct.unpack(">bbddfBffB", data[5:subLen] )
+                print("Tool", struct.unpack(">bbddfBffB", data[5:subLen] ))
         elif packageType == 3:
             # Masterboard Data
             assert subLen == 72, subLen
             if verbose:
-                print "Masterboard", [hex(x) for x in struct.unpack(">II", data[5:5+8] )]
+                print("Masterboard", [hex(x) for x in struct.unpack(">II", data[5:5+8] )])
             if robot:
                 robot.inputs, robot.outputs = struct.unpack(">II", data[5:5+8])
         elif packageType == 4:
@@ -88,10 +88,10 @@ def parseData( data, robot=None, verbose=False ):
             if robot:
                 robot.pose = (x,y,z, rx,ry,rz)
             if verbose:
-                print "%.3f, %.3f, %.3f,    %.3f, %.3f, %.3f" % (x,y,z, rx,ry,rz)
+                print("%.3f, %.3f, %.3f,    %.3f, %.3f, %.3f" % (x,y,z, rx,ry,rz))
         data = data[subLen:]
     if verbose:
-        print "------------"
+        print("------------")
     return ret
 
 
@@ -110,7 +110,7 @@ class UniversalRobotUR5:
             self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.s.connect((UR5_HOST, UR5_PORT))
             filename = datetime.datetime.now().strftime("logs/ur5_%y%m%d_%H%M%S.bin")    
-            print filename
+            print(filename)
             self.logIn = open( filename, "wb" ) 
             self.logOut = open( filename.replace(".bin", ".cmd"), "wb" ) 
         else:
@@ -145,7 +145,7 @@ class UniversalRobotUR5:
 #        self.s.send("set_digital_out(8,True)" + "\n") # tool 0
         self.s.send("set_digital_out(8,False)" + "\n") # tool 0
         data = self.s.recv(1024)
-        print "Received", repr(data)
+        print("Received", repr(data))
 
 
     def scan( self ):
@@ -175,7 +175,7 @@ class UniversalRobotUR5:
     def openGripper( self ):
         for i in xrange(3):
             self.sendCmd("set_digital_out(8,False)" + "\n") # tool 0
-            print "OUTPUTS", self.outputs
+            print("OUTPUTS", self.outputs)
             if self.outputs == 0:
                 break
 
@@ -183,7 +183,7 @@ class UniversalRobotUR5:
     def closeGripper( self ):
         for i in xrange(3):
             self.sendCmd("set_digital_out(8,True)" + "\n") # tool 0
-            print "OUTPUTS", self.outputs
+            print("OUTPUTS", self.outputs)
             if self.outputs != 0:
                 break
 
@@ -219,12 +219,12 @@ def testUR5( args ):
     robot.goto( (0.3693, 0.291, 0.1) ) # drop apple
     robot.openGripper()
     robot.term()
-    print robot.pose
+    print(robot.pose)
 
 
 if __name__ == "__main__": 
     if len(sys.argv) < 2:
-        print __doc__
+        print(__doc__)
         sys.exit(1)
     if sys.argv[1] == "parse":
         data = open(sys.argv[2],"rb").read()
