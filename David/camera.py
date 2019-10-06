@@ -3,7 +3,7 @@ import requests
 import shutil
 import time
 
-This is the image url.
+#This is the image url.
 image_url = "http://192.168.1.6:4242/current.jpg?annotations=off"
 # Open the url image, set stream to True, this will return the stream content.
 count = 0
