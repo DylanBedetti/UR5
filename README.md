@@ -32,3 +32,4 @@ https://drive.google.com/drive/folders/1QQdr_Qnj1SAvO2nBpvGLtHtD3QO1ej2B?usp=sha
 * https://robodk.com/doc/en/PythonAPI/intro.html
 * https://pypi.org/project/robodk/
 * https://robodk.com/doc/en/RoboDK-API.html#PythonAPI
+* https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_calib3d/py_calibration/py_calibration.html
