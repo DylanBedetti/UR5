@@ -13,7 +13,7 @@
      'Partially close the gripper and wait for completion'
      Popup
      Gripper Move31% (1)
-     'Close the gripper and test the object detection'
+     'Close the gripper and test the object detPection'
      Popup
      Gripper Close (1)
      If rq_is_object_detected()
