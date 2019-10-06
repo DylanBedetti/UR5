@@ -27,5 +27,9 @@
 https://drive.google.com/drive/folders/1QQdr_Qnj1SAvO2nBpvGLtHtD3QO1ej2B?usp=sharing
 
 # Good resources
-http://www.zacobria.com/universal-robots-knowledge-base-tech-support-forum-hints-tips/
-https://github.com/SintefManufacturing/python-urx
+* http://www.zacobria.com/universal-robots-knowledge-base-tech-support-forum-hints-tips/
+* https://github.com/SintefManufacturing/python-urx
+* https://robodk.com/doc/en/PythonAPI/intro.html
+* https://pypi.org/project/robodk/
+* https://robodk.com/doc/en/RoboDK-API.html#PythonAPI
+* https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_calib3d/py_calibration/py_calibration.html

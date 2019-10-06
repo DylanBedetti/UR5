@@ -1,0 +1,40 @@
+ Program
+   Robot Program
+     Camera Locate
+       redtargetpos≔object_location
+       redtargetpos[2]=redtargetpos[2]+0.2
+       MoveJ
+         redtargetpos
+       Gripper Close (1)
+       MoveJ
+         Waypoint_3
+         Waypoint_2
+       Gripper Open (1)
+     MoveJ
+       Point_2_var
+     Camera Locate
+       grtargetpos≔object_location
+       grtargetpos[2]=grtargetpos[2]+0.2
+       MoveJ
+         grtargetpos
+       Gripper Close (1)
+       MoveJ
+         Waypoint_3
+         Waypoint_1
+       Gripper Open (1)
+     MoveJ
+       Point_2_var
+     Camera Locate
+       yetargetpos≔object_location
+       yetargetpos[2]=yetargetpos[2]+0.2
+       MoveJ
+         yetargetpos
+       Gripper Close (1)
+       MoveJ
+         Waypoint_3
+         Waypoint_4
+       Gripper Open (1)
+     MoveJ
+       Point_2_var
+     Camera Locate
+       Halt

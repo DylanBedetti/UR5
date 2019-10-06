@@ -1,0 +1,5 @@
+ Program
+   Robot Program
+     MoveJ
+       Waypoint_1
+       bucket
