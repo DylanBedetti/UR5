@@ -2,16 +2,21 @@ import cv2
 import requests
 import shutil
 import time
+import urx
 
 #This is the image url.
 image_url = "http://192.168.1.6:4242/current.jpg?annotations=off"
 # Open the url image, set stream to True, this will return the stream content.
 count = 0
 count1 = 0
+
+    #rob.set_freedrive(1,timeout = 60)
+    #time.sleep(10);
+
 while(1):
     resp = requests.get(image_url, stream=True)
     # Open a local file with wb ( write binary ) permission.
-    img_string = 'local_image_' + str(count) + '.jpg'
+    img_string = 'local_image_v2_' + str(count) + '.jpg'
     local_file = open(img_string, 'wb')
     # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
     resp.raw.decode_content = True
