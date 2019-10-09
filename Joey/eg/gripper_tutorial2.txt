@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
  Program
    Robot Program
      Popup
@@ -89,6 +90,98 @@
          rq_auto_release_open_and_wait()
          'Resets the activation status of the gripper. Use after an autorelease before activating the gripper.'
          rq_reset()
+=======
+ Program
+   Robot Program
+     Popup
+     'Activate the gripper before controling it'
+     Popup
+     rq_activate_and_wait()
+     'Fully close the gripper and wait for completion'
+     Popup
+     Gripper Close (1)
+     'Fully open the gripper and wait for completion'
+     Popup
+     Gripper Open (1)
+     'Partially close the gripper and wait for completion'
+     Popup
+     Gripper Move31% (1)
+     'Close the gripper and test the object detPection'
+     Popup
+     Gripper Close (1)
+     If rq_is_object_detected()
+       'An object has been detected'
+       Popup
+     Else
+       'No object detected'
+       Popup
+     'Get the gripper current position in %. 100% is reached when the grippers is in encompassing mode.'
+     popup(rq_get_position(), "Gripper position (%)", blocking=True)
+     'Command the gripper to open and continue the program execution.'
+     Popup
+     Gripper Open (1)
+     'You can insert robot movement instructions while the gripper is moving'
+     Wait rq_is_motion_complete()
+     'Gripper motion completed'
+     Popup
+     Script Funtions
+       Halt
+       Functions operating on a 0-100 span
+         'Sets the gripper force [0-100]'
+         rq_set_force_norm(50)
+         'Sets the gripper speed [0-100]'
+         rq_set_speed_norm(75)
+         'Sends the partial move command and continue [0-100]'
+         rq_move_norm(75)
+         'Sends the partial move command and wait until completion. [0-100]'
+         rq_move_and_wait_norm(30)
+         'Sets the target position [0-100]'
+         rq_set_pos_norm(45)
+         'Returns the gripper current position [0-100]'
+         position≔rq_current_pos_norm()
+       Functions operating on a 0-255 span
+         'Sends the partial move command and wait until completion. [0-255]'
+         rq_move_and_wait(150)
+         'Sets the target position'
+         rq_set_pos(150)
+         'Returns the gripper current position [0-255]'
+         position≔rq_current_pos()
+         'Sends the partial move command and continue'
+         rq_move(150)
+         'Sets the gripper speed [0-255]'
+         rq_set_speed(255)
+         'Sets the gripper force [0-255]'
+         rq_set_force(255)
+       Functions independant of the span
+         'Activate the gripper if needed and wait for completion'
+         rq_activate_and_wait()
+         'Activate the gripper and continue execution'
+         rq_activate()
+         'Wait the end of activation'
+         Wait rq_is_gripper_activated()
+         'Sends the open command and continue'
+         rq_open()
+         'Send the close command and continue'
+         rq_close()
+         'Returns True if the motion is completed.'
+         motion_complete≔rq_is_motion_complete()
+         'Returns True if an object has been detected.'
+         object_detected≔rq_is_object_detected()
+         'Sends the open command and wait until completion'
+         rq_open_and_wait()
+         'Sends the close command and wait until completion'
+         rq_close_and_wait()
+         'Sets the goto bit to 1. Refer to user manual.'
+         rq_go_to()
+         'Stops motion. The goto bit is cleared.'
+         rq_stop()
+         'Sends the closing autorelease instruction and wait until completion'
+         rq_auto_release_close_and_wait()
+         'Sends the opening autorelease instruction and wait until completion'
+         rq_auto_release_open_and_wait()
+         'Resets the activation status of the gripper. Use after an autorelease before activating the gripper.'
+         rq_reset()
+>>>>>>> 7303536747ce18cf9c3996be291c3ae9a5244b17
 =======
  Program
    Robot Program
