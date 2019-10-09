@@ -9,10 +9,10 @@ image_url = "http://192.168.1.6:4242/current.jpg?annotations=off"
 # Open the url image, set stream to True, this will return the stream content.
 count = 0
 count1 = 0
-
+cam_init_pos = [-0.006403748189107716, -1.9564278761493128, -0.4473179022418421, -1.808915917073385, -4.750971380864279, 0.04987834393978119]
     #rob.set_freedrive(1,timeout = 60)
     #time.sleep(10);
-
+rob.movej(cam_init_pos)
 while(1):
     resp = requests.get(image_url, stream=True)
     # Open a local file with wb ( write binary ) permission.
